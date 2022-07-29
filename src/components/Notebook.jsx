@@ -1,24 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NoteList from "./NoteList";
 import NotesDb from "./NotesDb";
-import NoteListDb from "./NoteListDb";
 import { nanoid } from "nanoid";
 import "../index.scss";
-
+import CreatedNote from "./CreatedNote";
 const Notebook = () => {
   const [notes, setNotes] = useState(NotesDb);
+  const [isFilterOn, setIsFilterOn] = useState(false);
+  const [filter, setFilter] = useState("all");
+  const [filteredNotes, setFilteredNotes] = useState(notes);
+  useEffect(() => {
+    notes.sort();
+  }, []);
+
   // const [list, setList] = useState(NoteListDb);
 
-  console.log(notes);
-
   const filterResult = (category) => {
-    const result = NoteListDb.filter((data) => {
-      return data.category === category;
-    });
-    setNotes(result);
+    if (category === "all") {
+      setFilteredNotes(notes);
+      setIsFilterOn(false);
+    } else {
+      const result = notes.filter((data) => {
+        return data.category === category;
+      });
+      setFilteredNotes(result);
+      setIsFilterOn(true);
+      setFilter(category);
+    }
   };
 
-  const addNote = (content, title) => {
+  const addNote = (title, content) => {
     const date = new Date();
     console.log(content);
     const theNewNote = {
@@ -26,19 +37,55 @@ const Notebook = () => {
       content: content,
       id: nanoid(),
       date: date.toLocaleDateString(),
+      category: filter,
     };
-    const completedNote = [...notes, theNewNote];
-    setNotes(completedNote);
+    if (isFilterOn) {
+      setFilteredNotes((prevState) => [theNewNote, ...prevState]);
+      setNotes((prevState) => [theNewNote, ...prevState]);
+    } else {
+      setNotes((prevState) => [theNewNote, ...prevState]);
+    }
   };
 
+  // method to delete a note from the list of notes if they are filtered or not
   const deleteNote = (id) => {
-    const completedNote = notes.filter((note) => note.id !== id);
-    setNotes(completedNote);
+    if (isFilterOn) {
+      console.log("filtered before", filteredNotes);
+      setFilteredNotes((prevState) =>
+        prevState.filter((note) => note.id !== id)
+      );
+      setNotes((prevState) => prevState.filter((note) => note.id !== id));
+    } else {
+      console.log("not filder before", filteredNotes);
+      setNotes((prevState) => prevState.filter((note) => note.id !== id));
+      console.log("not filder after", filteredNotes);
+    }
   };
+
+  // const deleteNote = (id) => {
+  //   console.log("Before")
+  //   console.log(variablea++);
+  //   let filterIndex = filteredNotes.findIndex((data) => data.id === id);
+  //   let index = notes.findIndex((note) => note.id === id);
+
+  //   if (isFilterOn) {
+  //     setFilteredNotes((prevState) => [...prevState.splice(filterIndex, 1)]);
+  //     setNotes((prevState) => [...prevState.splice(index, 1)]);
+  //   } else {
+  //     setNotes((prevState) => [...prevState.splice(index, 1)]);
+  //     setFilteredNotes(notes);
+  //   }
+  // };
   return (
     <div className="notelist max-w-[800px] w-[90%]  flex items-center backdrop-blur-md justify-center bg-[#0000009a] text-white">
       <div className="w-1/2 py-[3rem] ">
         <div className="flex flex-col">
+          <button
+            onClick={() => filterResult("all")}
+            className="w-full hover:bg-[#0000009a] transition-all 0.3s py-3 text-lg text-left pl-4 uppercase"
+          >
+            All notes
+          </button>
           <button
             onClick={() => filterResult("todo")}
             className="w-full hover:bg-[#0000009a] transition-all 0.3s py-3 text-lg text-left pl-4 uppercase"
@@ -65,19 +112,22 @@ const Notebook = () => {
           </button>
         </div>
       </div>
-      <div className="w-1/2 bg-[#4b4a4a11] py-4 backdrop-blur-md max-h-[35rem] h-[35rem] overflow-y-scroll">
-        <h1>{notes.title}</h1>
-        {notes.map((note) => {
-          return (
-            <NoteList
-              title={note.title}
-              notes={notes}
-              addingNote={addNote}
-              deletingNote={deleteNote}
-              id={note.id}
-            />
-          );
-        })}
+      <div className="w-1/2 bg-[#4b4a4a11] flex flex-col items-center py-4 backdrop-blur-md max-h-[35rem] h-[35rem] overflow-y-scroll">
+        {!isFilterOn && <h1>All notes</h1>}
+        {isFilterOn && <h1 className="capitalize">{filter}</h1>}
+        {isFilterOn && <CreatedNote fliter={filter} addingNote={addNote} />}
+        {!isFilterOn &&
+          notes.map((note) => {
+            return (
+              <NoteList key={note.id} note={note} deletingNote={deleteNote} />
+            );
+          })}
+        {isFilterOn &&
+          filteredNotes.map((note) => {
+            return (
+              <NoteList key={note.id} note={note} deletingNote={deleteNote} />
+            );
+          })}
         {/* 
         <NoteList
           id={list.id}
