@@ -7,13 +7,13 @@ import "../index.scss";
 
 const Notebook = () => {
   const [notes, setNotes] = useState(NotesDb);
-  const [list, setList] = useState(NoteListDb);
+  // const [list, setList] = useState(NoteListDb);
 
-  console.log(list);
+  console.log(notes);
 
-  const filterResult = (categorie) => {
-    const result = NotesDb.filter((data) => {
-      return data.category === categorie;
+  const filterResult = (category) => {
+    const result = NoteListDb.filter((data) => {
+      return data.category === category;
     });
     setNotes(result);
   };
@@ -66,14 +66,27 @@ const Notebook = () => {
         </div>
       </div>
       <div className="w-1/2 bg-[#4b4a4a11] py-4 backdrop-blur-md max-h-[35rem] h-[35rem] overflow-y-scroll">
+        <h1>{notes.title}</h1>
+        {notes.map((note) => {
+          return (
+            <NoteList
+              title={note.title}
+              notes={notes}
+              addingNote={addNote}
+              deletingNote={deleteNote}
+              id={note.id}
+            />
+          );
+        })}
+        {/* 
         <NoteList
-          title={notes.title}
-          notes={notes}
+          id={list.id}
+          key={list.id}
+          title={list.title}
+          notes={list}
           addingNote={addNote}
           deletingNote={deleteNote}
-        />
-
-        {/* <Note deletingNote={deleteNote} /> */}
+        /> */}
       </div>
     </div>
   );

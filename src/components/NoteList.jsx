@@ -11,16 +11,16 @@ function NoteList({ notes, addingNote, deletingNote, title }) {
         return (
           <Note
             key={note.id}
-            addingNote={addingNote}
             id={note.id}
             title={note.title}
             content={note.content}
             date={note.date}
             deletingNote={deletingNote}
+            addingNote={addingNote}
           />
         );
       })}
-      <CreatedNote addingNote={addingNote} />
+      <CreatedNote addingNote={addingNote} title={title} />
     </div>
   );
 }
